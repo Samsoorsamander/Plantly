@@ -1,9 +1,11 @@
+import { useRouter } from "expo-router";
 import { View, Text, StyleSheet } from "react-native";
 
-export default function IdeaScreen() {
+export default function CounterScreen() {
+  const router = useRouter();
   return (
     <View style={Styles.container}>
-      <Text style={Styles.text}>Idea </Text>
+      <Text style={Styles.text}>Counter</Text>
     </View>
   );
 }
