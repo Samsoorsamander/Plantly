@@ -1,70 +1,81 @@
-import { StyleSheet, Text, View, TouchableOpacity,Alert,  } from 'react-native';
-import { theme } from '../theme';
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
+import { theme } from "../theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
 type Props = {
-  name:String,
-  isCompleted?: boolean,
-}
+  name: String;
+  isCompleted?: boolean;
+  onDelete: () => void;
+};
 
-export function ShopingListItem({name, isCompleted}:Props) {
-
-    const handleDelete = () => {
-        Alert.alert(`Are you sure you want to delete ${name}`,
-        "It will be gone for good",
-        [
-          {
-            text:"Yes",
-            onPress:() =>console.log("deleting"),
-            style:'destructive'
-          },
-          {
-            text:"Cancel",
-            style:'cancel'
-          }
-        ]
-        );
-      }
-    return (
-        
-      <View style ={[styles.itemContainer, isCompleted ? styles.completedContainer: undefined]}>
-      <Text style={[styles.itemText, isCompleted ? styles.completedText: undefined]}> {name} </Text>
-      <TouchableOpacity
-       onPress={handleDelete} 
-       activeOpacity={0.8}>
-        <AntDesign name="closecircle" size={24} color={isCompleted ?theme.colorGray: theme.colorRed}/>
+export function ShopingListItem({ name, isCompleted, onDelete }: Props) {
+  const handleDelete = () => {
+    Alert.alert(
+      `Are you sure you want to delete ${name}`,
+      "It will be gone for good",
+      [
+        {
+          text: "Yes",
+          onPress: () => onDelete(),
+          style: "destructive",
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
+  };
+  return (
+    <View
+      style={[
+        styles.itemContainer,
+        isCompleted ? styles.completedContainer : undefined,
+      ]}
+    >
+      <Text
+        style={[
+          styles.itemText,
+          isCompleted ? styles.completedText : undefined,
+        ]}
+      >
+        {" "}
+        {name}{" "}
+      </Text>
+      <TouchableOpacity onPress={handleDelete} activeOpacity={0.8}>
+        <AntDesign
+          name="closecircle"
+          size={24}
+          color={isCompleted ? theme.colorGray : theme.colorRed}
+        />
       </TouchableOpacity>
-      </View>
-
-    )
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    completedContainer:{
-      backgroundColor:theme.colorLigtGray,
-      borderBottomColor:theme.colorLigtGray
-    },
-    itemContainer: {
-      paddingHorizontal:18,
-      paddingVertical: 16,
-      borderBottomWidth:1,
-      borderBottomColor:"#1a759f",
-      flexDirection:'row',
-      alignItems:'center',
-      justifyContent: 'space-between',
-    },
-    completedButton: {
-      backgroundColor:theme.colorGray,
-
-    },
-    itemText: {
-      fontSize: 18,
-       fontWeight:"200"
-      },
-      completedText: {
-        textDecorationColor:theme.colorGray,
-        textDecorationLine:"line-through",
-        color:theme.colorGray
-      },
-    
-  });
-  
+  completedContainer: {
+    backgroundColor: theme.colorLigtGray,
+    borderBottomColor: theme.colorLigtGray,
+  },
+  itemContainer: {
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#1a759f",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  completedButton: {
+    backgroundColor: theme.colorGray,
+  },
+  itemText: {
+    fontSize: 18,
+    fontWeight: "200",
+  },
+  completedText: {
+    textDecorationColor: theme.colorGray,
+    textDecorationLine: "line-through",
+    color: theme.colorGray,
+  },
+});
