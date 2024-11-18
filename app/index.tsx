@@ -1,4 +1,4 @@
-import { StyleSheet, View, TextInput } from "react-native";
+import { StyleSheet, View, TextInput, ScrollView } from "react-native";
 import { ShopingListItem } from "../Components/ShopingLIstItem";
 import { Link } from "expo-router";
 import { theme } from "../theme";
@@ -31,7 +31,11 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      stickyHeaderIndices={[0]}
+    >
       <TextInput
         style={styles.textInput}
         placeholder="E.g. Coffee"
@@ -43,7 +47,7 @@ export default function App() {
       {shoppingList.map((item) => (
         <ShopingListItem name={item.name} key={item.id} />
       ))}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -53,8 +57,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 12,
   },
+  contentContainer: {
+    paddingBottom: 24,
+  },
   textInput: {
     borderColor: theme.colorGray,
+    backgroundColor: theme.colorWhite,
     borderWidth: 2,
     padding: 12,
     marginBottom: 12,
