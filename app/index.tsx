@@ -1,6 +1,5 @@
-import { StyleSheet, View, TextInput, ScrollView } from "react-native";
+import { StyleSheet, View, Text, TextInput, FlatList } from "react-native";
 import { ShopingListItem } from "../Components/ShopingLIstItem";
-import { Link } from "expo-router";
 import { theme } from "../theme";
 import { useState } from "react";
 
@@ -9,11 +8,11 @@ type shoppingListItemType = {
   name: string;
 };
 
-const intialList: shoppingListItemType[] = [
-  { id: "1", name: "Coffee" },
-  { id: "2", name: "Tea" },
-  { id: "3", name: "Milk" },
-];
+const intialList: shoppingListItemType[] = [];
+
+const testData = new Array(1000)
+  .fill(null)
+  .map((item, index) => ({ id: String(index), name: String(index) }));
 export default function App() {
   const [shoppingList, setShoppingList] =
     useState<shoppingListItemType[]>(intialList);
@@ -31,23 +30,28 @@ export default function App() {
   };
 
   return (
-    <ScrollView
+    <FlatList
+      data={shoppingList}
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       stickyHeaderIndices={[0]}
-    >
-      <TextInput
-        style={styles.textInput}
-        placeholder="E.g. Coffee"
-        value={value}
-        onChangeText={setValue}
-        returnKeyType="done"
-        onSubmitEditing={handleSubmit}
-      />
-      {shoppingList.map((item) => (
-        <ShopingListItem name={item.name} key={item.id} />
-      ))}
-    </ScrollView>
+      ListEmptyComponent={
+        <View style={styles.emptyListContainer}>
+          <Text>Shopping list is empty</Text>
+        </View>
+      }
+      ListHeaderComponent={
+        <TextInput
+          style={styles.textInput}
+          placeholder="E.g. Coffee"
+          value={value}
+          onChangeText={setValue}
+          returnKeyType="done"
+          onSubmitEditing={handleSubmit}
+        />
+      }
+      renderItem={({ item }) => <ShopingListItem name={item.name} />}
+    />
   );
 }
 
@@ -69,5 +73,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     fontSize: 18,
     borderRadius: 50,
+  },
+  emptyListContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
