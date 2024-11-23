@@ -1,4 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { theme } from "../../theme";
 import { registerForPushNotificationsAsync } from "../../utils/registerForPushNotificationsAsync";
 import * as Notifications from "expo-notifications";
@@ -6,21 +13,48 @@ import * as Device from "expo-device";
 import { useEffect, useState } from "react";
 import { Duration, isBefore, intervalToDuration } from "date-fns";
 import { TimeSegment } from "../../Components/TimeSegment";
+import { getFromStorage, saveToStorage } from "../../utils/storage";
+
+const countdownStorageKey = "taskly-countdown";
+
+type PersistedCountdownState = {
+  currentNotificationId: string | undefined;
+  completedAtTimestapm: number[];
+};
 
 type countdownStatus = {
   isOverdue: boolean;
   distance: Duration;
 };
 
-const timeStamp = Date.now() + 10 * 1000;
+const frequency = 10 * 1000;
 export default function CounterScreen() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [countdownState, setCountdownState] =
+    useState<PersistedCountdownState>();
   const [status, setStatus] = useState<countdownStatus>({
     isOverdue: false,
     distance: {},
   });
 
+  const lastCompletedTimestamp = countdownState?.completedAtTimestapm[0];
+
+  useEffect(() => {
+    const init = async () => {
+      const value = await getFromStorage(countdownStorageKey);
+      setCountdownState(value);
+    };
+    init();
+  }, []);
+
   useEffect(() => {
     const intervalId = setInterval(() => {
+      const timeStamp = lastCompletedTimestamp
+        ? lastCompletedTimestamp + frequency
+        : Date.now();
+      if (lastCompletedTimestamp) {
+        setIsLoading(false);
+      }
       const isOverdue = isBefore(timeStamp, Date.now());
       const distance = intervalToDuration(
         isOverdue
@@ -32,16 +66,17 @@ export default function CounterScreen() {
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [lastCompletedTimestamp]);
   const schedaulNotificaton = async () => {
+    let pushNotificationId;
     const result = await registerForPushNotificationsAsync();
     if (result === "granted") {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "I'm a notification from your app",
+          title: "The thing is due!",
         },
         trigger: {
-          seconds: 5,
+          seconds: frequency / 1000,
         },
       });
     } else {
@@ -52,7 +87,28 @@ export default function CounterScreen() {
         );
       }
     }
+    if (countdownState?.currentNotificationId) {
+      await Notifications.cancelScheduledNotificationAsync(
+        countdownState?.currentNotificationId
+      );
+    }
+    const newCountdownState: PersistedCountdownState = {
+      currentNotificationId: pushNotificationId,
+      completedAtTimestapm: countdownState
+        ? [Date.now(), ...countdownState.completedAtTimestapm]
+        : [Date.now()],
+    };
+    setCountdownState(newCountdownState);
+    await saveToStorage(countdownStorageKey, newCountdownState);
   };
+
+  if (isLoading) {
+    return (
+      <View style={Styles.activityInicatorContainer}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
   return (
     <View
       style={[
@@ -137,5 +193,11 @@ const Styles = StyleSheet.create({
   },
   whiteText: {
     color: theme.colorWhite,
+  },
+  activityInicatorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignContent: "center",
+    backgroundColor: theme.colorWhite,
   },
 });
