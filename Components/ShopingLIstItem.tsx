@@ -14,6 +14,7 @@ type Props = {
   isCompleted?: boolean;
   onDelete: () => void;
   onToggleComplete: () => void;
+  onEdit: () => void;
 };
 
 export function ShopingListItem({
@@ -21,6 +22,7 @@ export function ShopingListItem({
   isCompleted,
   onDelete,
   onToggleComplete,
+  onEdit,
 }: Props) {
   const handleDelete = () => {
     Alert.alert(
@@ -38,6 +40,19 @@ export function ShopingListItem({
         },
       ]
     );
+  };
+  const handleEdit = () => {
+    Alert.alert(`Do you want to edite  ${name}`, "Edite", [
+      {
+        text: "Yes",
+        onPress: () => onEdit(),
+        style: "destructive",
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
   };
   return (
     <Pressable
@@ -64,6 +79,17 @@ export function ShopingListItem({
           {name}{" "}
         </Text>
       </View>
+      <TouchableOpacity
+        onPress={handleEdit}
+        activeOpacity={0.8}
+        style={{ marginRight: 8 }}
+      >
+        <AntDesign
+          name="edit"
+          size={24}
+          color={isCompleted ? theme.colorGray : theme.colorRed}
+        />
+      </TouchableOpacity>
       <TouchableOpacity onPress={handleDelete} activeOpacity={0.8}>
         <AntDesign
           name="closecircle"

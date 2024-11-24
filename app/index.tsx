@@ -8,9 +8,10 @@ import {
 } from "react-native";
 import { ShopingListItem } from "../Components/ShopingLIstItem";
 import { theme } from "../theme";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getFromStorage, saveToStorage } from "../utils/storage";
 import * as Haptics from "expo-haptics";
+import { set } from "date-fns";
 
 type shoppingListItemType = {
   id: string;
@@ -18,11 +19,12 @@ type shoppingListItemType = {
   completedAtTimestamp?: number;
   lastUpdatedTimestamp: number;
 };
-
 const intialList: shoppingListItemType[] = [];
 const storageKey = "shopping-list";
 
 export default function App() {
+  const InputRef = useRef<any>(null);
+
   const [shoppingList, setShoppingList] =
     useState<shoppingListItemType[]>(intialList);
   const [value, setValue] = useState("");
@@ -61,7 +63,15 @@ export default function App() {
     setShoppingList(newShoppingList);
     saveToStorage(storageKey, newShoppingList);
   };
-
+  const handleEdit = (id: string, name: string) => {
+    const newShoppingList = shoppingList.filter((item) => item.id !== id);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setShoppingList(newShoppingList);
+    InputRef.current.focus();
+    setValue(name);
+    saveToStorage(storageKey, newShoppingList);
+  };
   const handleToggleComplete = (id: string) => {
     const newShoppingList = shoppingList.map((item) => {
       if (item.id === id) {
@@ -101,6 +111,7 @@ export default function App() {
           style={styles.textInput}
           placeholder="E.g. Coffee"
           value={value}
+          ref={InputRef}
           onChangeText={setValue}
           returnKeyType="done"
           onSubmitEditing={handleSubmit}
@@ -110,6 +121,7 @@ export default function App() {
         <ShopingListItem
           name={item.name}
           onDelete={() => handleDelete(item.id)}
+          onEdit={() => handleEdit(item.id, item.name)}
           onToggleComplete={() => handleToggleComplete(item.id)}
           isCompleted={Boolean(item.completedAtTimestamp)}
         />
